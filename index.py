@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+#======= Configurations =======#
 config = {
     "assets": [
         "KRAKEN:XBTEUR",
@@ -15,12 +18,12 @@ config = {
     "epoch": "12M",
     "background": "#0d0d0d"
 }
-
+#==============================#
 
 def widgetInject(symbol, epoch, color, underLineColor, base):
     
     return f'''\
-        <div style="position:relative;display:inline-block;height:{int(100/base)}%;width:{int(100/base)}%">
+        <div style="position:relative;display:inline-block;height:{int(100/base+10)}%;width:{int(100/base)}%">
             <div class="tradingview-widget-container">
             <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>{"{"} 
             "symbol": "{symbol}",
@@ -82,6 +85,3 @@ if __name__ == "__main__":
         pass
     finally: 
         os.remove(path)
-    
-    
-    
