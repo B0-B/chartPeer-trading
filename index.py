@@ -13,9 +13,9 @@ config = {
         "KRAKEN:LSKEUR",
         "KRAKEN:ICXEUR"
     ],
-    "color": "#37a6ef",
-    "colorShade": "rgba(255, 255, 0, 0.15)",
-    "epoch": "12M",
+    "color": "#03b1fc",
+    "colorShade": "rgba(3, 177, 252, 0.15)",
+    "epoch": "3M",
     "background": "#0d0d0d"
 }
 #==============================#
@@ -46,7 +46,7 @@ def widgetInject(symbol, epoch, color, underLineColor, base):
 def buildPage(params): # widgets must be 
 
     widgets = len(params["assets"])
-    base = widgets**(0.5)
+    base = int(widgets**(0.5))
     
     # build widgets and add them to dummy
     injection = ""
