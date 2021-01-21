@@ -81,9 +81,36 @@ def buildPage(params): # widgets must be
     return htmlDummy
 
 if __name__ == "__main__":
-    import os, time, yaml, webbrowser as browser
+    import os, time, webbrowser as browser
     with open('config.yml') as f:
-        config = yaml.safe_load(f)
+        text = f.read()
+        lines = text.split('\n')
+        config = {}
+        keys = []
+        values = []
+        for l in range(len(lines)):
+            line = lines[l]
+            if '#' in line:
+                pass
+            else:
+                if ':' in line and '-' not in line:
+                    key = line.split(':')[0]
+                    if line.split(':')[1] == '':
+                        arr = []
+                        while (True):
+                            l += 1
+                            line = lines[l]
+                            if '-' in line:
+                                arr.append(line.replace('-','').replace(' ', ''))
+                            elif '#' in line:
+                                pass
+                            else:
+                                l -= 1
+                                break
+                        value = arr
+                    else:
+                        value = line.split(':')[1].replace('-','').replace(' ', '')
+                    config[key] = value
     path1 = os.path.abspath('logo.svg')
     path2 = os.path.abspath('temp.html')
     favicon(path1)

@@ -1,3 +1,5 @@
+# Keep the shape of the file!
+
 assets:
   # put any asset on your watch list
   # search for assets here: 
@@ -24,5 +26,6 @@ color: rgba(3, 177, 252, 1)
 
 colorShade: rgba(3, 177, 252, 0.15)
 
-epoch: 6M # possible epochs: 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
+# possible epochs: 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
+epoch: 6M 
 
