@@ -1,5 +1,5 @@
 # chartPeer---trandingview-monitoring-panel
-To declare an arbitrary amount of assets/instruments from your whatch list use tradingview-compliant
+To declare an arbitrary amount of assets/instruments from your watch list use tradingview-compliant
 symbols in the configuration section in index.py. Also you can customize the colors and 'epoch' (total time - 12 months is default).
 - No dependencies
 - Quick and Useful for day traders
