@@ -4,9 +4,9 @@
 config = {
     "assets": [
         "KRAKEN:XBTEUR",
-        "KRAKEN:TRXEUR",
-        "KRAKEN:KEEPEUR",
-        "KRAKEN:ETHEUR",
+        "NASDAQ:AAPL",
+        "NASDAQ:TSLA",
+        "AMEX:SPY",
         "KRAKEN:DOTEUR",
         "KRAKEN:XRPEUR",
         "KRAKEN:AAVEEUR",
