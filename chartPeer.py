@@ -1,32 +1,5 @@
 #!/usr/bin/env python3
 
-#======= Configurations =======#
-config = {
-    "assets": [
-        "KRAKEN:XBTEUR",
-        "KRAKEN:TRXEUR",
-        "KRAKEN:DOTEUR",
-        "KRAKEN:XRPEUR",
-        "KRAKEN:AAVEEUR",
-        "KRAKEN:LSKEUR",
-        "KRAKEN:ICXEUR",
-        "KRAKEN:MLNEUR",
-        "KRAKEN:XLMEUR",
-        "KRAKEN:SCEUR",
-        "KRAKEN:NANOEUR",
-        "KRAKEN:ADAEUR",
-        "KRAKEN:MLNEUR",
-        "KRAKEN:XMREUR",
-        "KRAKEN:GRTEUR",
-        "KRAKEN:KNCEUR",
-    ],
-    "color": "#03b1fc",
-    "colorShade": "rgba(3, 177, 252, 0.15)",
-    "epoch": "1D", # 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
-    "background": "#0d0d0d"
-}
-#==============================#
-
 def widgetInject(symbol, epoch, color, underLineColor, base):
     
     return f'''\
@@ -108,7 +81,9 @@ def buildPage(params): # widgets must be
     return htmlDummy
 
 if __name__ == "__main__":
-    import os, time, webbrowser as browser
+    import os, time, yaml, webbrowser as browser
+    with open('config.yml') as f:
+        config = yaml.safe_load(f)
     path1 = os.path.abspath('logo.svg')
     path2 = os.path.abspath('temp.html')
     favicon(path1)

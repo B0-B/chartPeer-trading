@@ -1,34 +1,50 @@
-# chartPeer :chart:
+# chartPeer  [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Get%20over%20170%20free%20design%20blocks%20based%20on%20Bootstrap%204&url=https://www.froala.com/design-blocks&via=froala&hashtags=bootstrap,design,templates,blocks,developers)
+
+<br>
+
+### *For the men who stare at charts.*  :goat:
+
+<br>
+
+<img src="demo.gif" width="780" height="440" />
+
+<br>
+
 ## A decent & scalable chart panel monitor
 To declare an arbitrary amount of assets/instruments (watch list) insert tradingview-compliant (MARKET:SYMBOL e.g. "NASDAQ:AAPL")
-symbols in the configuration section in index.py. Also you can customize the colors and 'epoch' (total time - 12 months is default).
+symbols in the configuration section in `config.yml`. Customize the colors and 'epoch' (total time - 12 months is default) by your taste.
 
 
-```python
-#!/usr/bin/env python3
+```yaml
+assets:
+  # put any asset on your watch list
+  # search for assets here: https://www.tradingview.com/widget/technical-analysis/
+  - KRAKEN:XBTEUR
+  - KRAKEN:TRXEUR
+  - KRAKEN:DOTEUR
+  - KRAKEN:XRPEUR
+  - KRAKEN:AAVEEUR
+  - KRAKEN:LSKEUR
+  - KRAKEN:ICXEUR
+  - KRAKEN:MLNEUR
+  - KRAKEN:XLMEUR
+  - KRAKEN:SCEUR
+  - KRAKEN:NANOEUR
+  - KRAKEN:ADAEUR
+  - KRAKEN:MLNEUR
+  - KRAKEN:XMREUR
+  - KRAKEN:GRTEUR
+  - KRAKEN:KNCEUR
 
-#======= Configurations =======#
-config = {
-    "assets": [
-        "KRAKEN:XBTEUR",
-        "NASDAQ:AAPL",
-        "NASDAQ:TSLA",
-        "AMEX:SPY",
-        "KRAKEN:DOTEUR",
-        "KRAKEN:XRPEUR",
-        "KRAKEN:AAVEEUR",
-        "KRAKEN:LSKEUR",
-        "KRAKEN:ICXEUR"
-    ],
-    "color": "#37a6ef",
-    "colorShade": "rgba(255, 255, 0, 0.15)",
-    "epoch": "12M",
-    "background": "#0d0d0d"
-}
-#==============================#
-...
+background: rgba(0, 0, 0, 1)  
+
+color: rgba(3, 177, 252, 1)
+
+colorShade: rgba(3, 177, 252, 0.15)
+
+epoch: 1D # possible epochs: 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
 ```
-## < 7kB 
+## everything you need in 7kB 
 :heavy_check_mark: Chrome/Firefox <br>
 :heavy_check_mark: No Dependencies <br>
 :heavy_check_mark: Frame Embedment <br>
@@ -36,8 +52,8 @@ config = {
 :heavy_check_mark: Quick and Useful for day trading <br>
 
 ## Usage
-
 Long story short:
 ```bash 
 ~$ python chartPeer.py
 ```
+
