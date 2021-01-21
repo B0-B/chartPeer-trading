@@ -1,8 +1,8 @@
-# chartPeer---tradingview-monitoring-panel
-To declare an arbitrary amount of assets/instruments from your watch list use tradingview-compliant
+# chartPeer :chart:
+## A decent & scalable chart panel monitor
+To declare an arbitrary amount of assets/instruments (watch list) insert tradingview-compliant (MARKET:SYMBOL e.g. "NASDAQ:AAPL)
 symbols in the configuration section in index.py. Also you can customize the colors and 'epoch' (total time - 12 months is default).
-- No dependencies
-- Quick and Useful for day traders
+
 
 ```python
 #!/usr/bin/env python3
@@ -28,6 +28,14 @@ config = {
 #==============================#
 ...
 ```
+## < 7kB 
+:heavy_check_mark: Chrome/Firefox
+:heavy_check_mark: No Dependencies
+:heavy_check_mark: Frame Embedment
+:heavy_check_mark: Customizable
+:heavy_check_mark: Quick and Useful for day trading
+
+
 To launch the browser app prompt in the root directory
 ```python 
 python index.py
