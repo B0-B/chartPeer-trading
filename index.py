@@ -68,7 +68,7 @@ def buildPage(params): # widgets must be
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" type="image/x-icon" href="logo.svg">
-        <title>dashview</title>
+        <title>chartPeer [Monitor]</title>
     </head>
     <body style="height: 100%; width: 100%; background: {params["background"]}; margin: 0">
         {injection}
