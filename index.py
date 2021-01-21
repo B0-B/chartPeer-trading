@@ -4,18 +4,25 @@
 config = {
     "assets": [
         "KRAKEN:XBTEUR",
-        "NASDAQ:AAPL",
-        "NASDAQ:TSLA",
-        "AMEX:SPY",
+        "KRAKEN:TRXEUR",
         "KRAKEN:DOTEUR",
         "KRAKEN:XRPEUR",
         "KRAKEN:AAVEEUR",
         "KRAKEN:LSKEUR",
-        "KRAKEN:ICXEUR"
+        "KRAKEN:ICXEUR",
+        "KRAKEN:MLNEUR",
+        "KRAKEN:XLMEUR",
+        "KRAKEN:SCEUR",
+        "KRAKEN:NANOEUR",
+        "KRAKEN:ADAEUR",
+        "KRAKEN:MLNEUR",
+        "KRAKEN:XMREUR",
+        "KRAKEN:GRTEUR",
+        "KRAKEN:KNCEUR",
     ],
     "color": "#03b1fc",
     "colorShade": "rgba(3, 177, 252, 0.15)",
-    "epoch": "3M",
+    "epoch": "1D", # 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
     "background": "#0d0d0d"
 }
 #==============================#
@@ -23,7 +30,7 @@ config = {
 def widgetInject(symbol, epoch, color, underLineColor, base):
     
     return f'''\
-        <div style="position:relative;display:inline-block;height:{int(100/base+10)}%;width:{int(100/base)}%">
+        <div style="position:relative;display:inline-block;height:{int(100/base+10)}%;width:{int(100/base-0.1)}%">
             <div class="tradingview-widget-container">
             <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>{"{"} 
             "symbol": "{symbol}",
@@ -63,7 +70,7 @@ def buildPage(params): # widgets must be
         <link rel="shortcut icon" type="image/x-icon" href="logo.svg">
         <title>dashview</title>
     </head>
-    <body style="height: 100%; width: 100%; background: {params["background"]}">
+    <body style="height: 100%; width: 100%; background: {params["background"]}; margin: 0">
         {injection}
     <body>
     '''
