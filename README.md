@@ -45,14 +45,14 @@ colorShade: rgba(3, 177, 252, 0.15)
 epoch: 1D # possible epochs: 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
 ```
 ## everything you need in 7kB 
-:heavy_check_mark: Chrome/Firefox <br>
+
 :heavy_check_mark: No Dependencies <br>
 :heavy_check_mark: Frame Embedment <br>
 :heavy_check_mark: Customizable <br>
 :heavy_check_mark: Quick and Useful for day trading <br>
+:heavy_check_mark: tested in Chrome & Firefox <br>
 
 ## Usage
-Long story short:
 ```bash 
 ~$ python chartPeer.py
 ```
