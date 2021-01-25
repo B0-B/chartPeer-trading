@@ -125,5 +125,6 @@ if __name__ == "__main__":
     except:
         pass
     finally:
-        for path in [path1, path2]:
-            os.remove(path)
+        if not eval(config['keepHTMLinLocal']):
+            for path in [path1, path2]:
+                os.remove(path)

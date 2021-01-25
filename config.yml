@@ -29,3 +29,6 @@ colorShade: rgba(3, 177, 252, 0.15)
 # possible epochs: 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
 epoch: 6M 
 
+# should the build stay persistent? 
+# If enabled reloads of the page are possible within the browser.
+keepHTMLinLocal: False
