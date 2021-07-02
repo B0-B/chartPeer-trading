@@ -1,4 +1,4 @@
-# chartPeer  [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=For%20the%20men%20who%20stare%20at%20charts&url=https://www.github.com/B0-B/chartPeer---tradingview-monitoring-panel&hashtags=chart,trading, analysis,ticker,tradingview,livedata)
+# chartPeer  [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=For%20the%20men%20who%20stare%20at%20charts&url=https://www.github.com/B0-B/chartPeer---tradingview-monitoring-panel&hashtags=chart,trading,analysis,ticker,tradingview,livedata)
 
 <br>
 
