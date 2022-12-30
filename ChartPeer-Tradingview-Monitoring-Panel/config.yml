@@ -1,0 +1,34 @@
+# Keep the shape of the file!
+
+assets:
+  # put any asset on your watch list
+  # search for assets here: 
+  - KRAKEN:XBTEUR
+  - KRAKEN:TRXEUR
+  - KRAKEN:DOTEUR
+  - KRAKEN:XRPEUR
+  - KRAKEN:AAVEEUR
+  - KRAKEN:LSKEUR
+  - KRAKEN:ICXEUR
+  - KRAKEN:MLNEUR
+  - KRAKEN:XLMEUR
+  - KRAKEN:SCEUR
+  - KRAKEN:NANOEUR
+  - KRAKEN:ADAEUR
+  - KRAKEN:MLNEUR
+  - KRAKEN:XMREUR
+  - KRAKEN:GRTEUR
+  - KRAKEN:KNCEUR
+
+background: rgba(0, 0, 0, 1)  
+
+color: rgba(3, 177, 252, 1)
+
+colorShade: rgba(3, 177, 252, 0.15)
+
+# possible epochs: 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
+epoch: 6M 
+
+# should the build stay persistent? 
+# If enabled reloads of the page are possible within the browser.
+keepHTMLinLocal: False
