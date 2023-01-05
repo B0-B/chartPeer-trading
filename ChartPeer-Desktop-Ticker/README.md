@@ -30,4 +30,4 @@ Specify the instrument symbol in the `config.json` and set all other parameters 
 ```
 The ticker aggregates data of max spec. lenght for analysis purposes.
 
-<img src='demo.png'>
+<img src='./ChartPeer-Desktop-Ticker/demo.png'>
