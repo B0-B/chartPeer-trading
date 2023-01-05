@@ -1,10 +1,6 @@
-# chartPeer  [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=For%20the%20men%20who%20stare%20at%20charts&url=https://www.github.com/B0-B/chartPeer---tradingview-monitoring-panel&hashtags=chart,trading,analysis,ticker,tradingview,livedata)
+# ChartPeer-Tradingview-Monitoring-Panel   
 
-<br>
 
-### *For the men who stare at charts.*  :goat:
-
-<br>
 
 <img src="demo.gif" width="780" height="440" />
 
@@ -44,13 +40,13 @@ colorShade: rgba(3, 177, 252, 0.15)
 
 epoch: 1D # possible epochs: 1D, 1M, 3M, 6M, 1Y, 5Y, ALL
 ```
-## everything you need in 7kB 
-:heavy_check_mark: Responsive <br>
-:heavy_check_mark: No Dependencies <br>
-:heavy_check_mark: Frame Embedment <br>
-:heavy_check_mark: Customizable <br>
-:heavy_check_mark: Quick and Useful for day trading <br>
-:heavy_check_mark: tested in Chrome & Firefox <br>
+## features
+✔️ Responsive <br>
+✔️ No Dependencies <br>
+✔️ Frame Embedment <br>
+✔️ Customizable <br>
+✔️ Quick and Useful for day trading <br>
+✔️ tested in Chrome & Firefox <br>
 
 ## Usage
 ```bash 
