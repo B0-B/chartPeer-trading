@@ -9,3 +9,4 @@ A continuously integrated trading toolkit designed for intuitive and simple usag
 ## Tools
 - [ChartPeer-Tradingview-Monitoring-Panel](https://github.com/B0-B/chartPeer---tradingview-monitoring-panel/tree/main/ChartPeer-Tradingview-Monitoring-Panel)
 - [ChartPeer-Desktop-Ticker](https://github.com/B0-B/chartPeer---tradingview-monitoring-panel/tree/main/ChartPeer-Desktop-Ticker)
+- [ChartPeer-SDK](https://github.com/B0-B/chartPeer-trading/tree/main/ChartPeer-SDK)

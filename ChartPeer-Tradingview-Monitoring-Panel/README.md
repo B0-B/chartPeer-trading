@@ -1,4 +1,4 @@
-# ChartPeer-Tradingview-Monitoring-Panel   
+<h1 align=center>ChartPeer-Tradingview-Monitoring-Panel</h1>   
 
 
 
