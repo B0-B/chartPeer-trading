@@ -1,0 +1,9 @@
+{
+    "name" : "chartpeer-sdk",
+    "version" : "1.0",
+    "author" : "B0-B",
+    "author_email" : "alch3mist94@protonmail.com",
+    "description" : "A developer kit with a user-friendly API to various technical analysis tools for traders.",
+    "url" : "https://github.com/B0-B/chartPeer-trading/chartpeer-sdk",
+    "licence" : "GNU"
+}
