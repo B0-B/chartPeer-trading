@@ -374,7 +374,7 @@ except ImportError as e:
 
 
 def lstm_gbm (dataset, feature_length, generations=10, smoothing=14, 
-              epochs=(20, 1), batch_size=1, input_size=60, deviation=1):
+              epochs=(20, 10), batch_size=1, input_size=60, deviation=1):
 
     '''
     LSTM sustained Geometric Brownian Motion Algorithm.
@@ -417,6 +417,8 @@ def lstm_gbm (dataset, feature_length, generations=10, smoothing=14,
     if type(dataset) is list:
         dataset = np.array(dataset)
 
+
+
     # compute the volatility index by accounting volatilites across a window span
     # and simple average it, save into a numpy array
     vol = []
@@ -431,27 +433,87 @@ def lstm_gbm (dataset, feature_length, generations=10, smoothing=14,
     vix_prediction = predictor.predict(vix)['prediction']
 
     # repeat the whole process for the drift resolvement
-    drifts = []
+    # take the pre-trained lstm predictor and fit to drift 
+    drifts = [] # array for moving avg. of the drift
     for i in range(smoothing, len(dataset)):
         drifts.append(statistics.drift(np.array(dataset[i-smoothing:i])))
-    # predictor = lstm(sequence_length=60, feature_length=30, epochs=30, batch_size=10)
     drift_prediction = predictor.predict(drifts, epochs=epochs[1])['prediction']
 
+
+
+    # construct the intrinsic cummulated probability distribution from
+    # the set of logarithmic returns. From each log return subtract the 
+    # expected drift and devide by the standard deviation (sampled drift and volatility)
+    # to obtain the intrinsic wiener probability distribution, this will be similar but 
+    # different from a standard normal distribution.  
+    returnIncrement = 0.0001
+    logReturns = []
+    for i in range(len(dataset)-1):
+        logReturns.append(np.log(dataset[i+1]/dataset[i]))
+    
+    # convert log-returns to standard normal values.
+    # At this step the characteristic wiener process i.e.
+    # the origin distribution is modelled, by subtracting and deviding
+    # geometric brownian expectation values.
+    logReturns = np.array(logReturns)
+    mu = np.mean(logReturns)
+    sigma = np.std(logReturns)
+    logReturns = logReturns - mu
+    logReturns = logReturns / sigma
+
+    # count occurrences for likelihoods+,
+     
+    start, stop = np.min(logReturns), np.max(logReturns)
+    returnRange = stop - start
+    bins = int(returnRange/returnIncrement) + 1
+    returnSpace = np.linspace(start, stop, bins)
+    likelihood = np.zeros((bins,))
+    for r in logReturns:
+        for pointer in range(bins-1):
+            if r < returnSpace[pointer+1] and r > returnSpace[pointer]:
+                likelihood[pointer] = likelihood[pointer] + 1
+                break
+    N = len(logReturns)
+    likelihood = [val/N for val in likelihood]  # normalize
+
+    # build cummulative distribution function
+    cummulativeDistribution = [likelihood[0]]
+    for i in range(1, len(likelihood)):
+        cummulativeDistribution.append(cummulativeDistribution[-1]+likelihood[i])
+
+
+
     # Simulation of geometric brownian motion path.
-    # Drift mu and volatility sigma vary over time are taken from LSTM fit.
+    # Drift mu and volatility sigma vary over time and are taken from LSTM fit.
     # The differential equation is fixed accordingly.
     mu = drift_prediction
     sigma = vix_prediction
 
+    
     generationSet = []
 
-    for g in len(generations):
+    for g in range(generations):
 
         # start new generation
         S = [dataset[-1]]
+
+        # generate a sequence of wiener values from intrinsic distribution
+        # using an inverse sampling method from the inverse of the cummulative distribution
+        dW = []
+        for _ in range(feature_length):    
+            u = np.random.uniform(0,1)
+            r = 0
+            for i in range(len(cummulativeDistribution)):
+                if u < cummulativeDistribution[i]:
+                    r = returnSpace[i]
+                    break  
+            dW.append(r)         
         for t in range(feature_length):
-            # improved stochastic differential equation with variable drift and volatility
-            delta_S = S[-1] * (mu[t] + sigma[t] * np.random.normal(0,1))
+
+            # improved stochastic differential equation with variable drift and volatility.
+            # The wiener increment dW originates from the extracted intrinsic distribution.
+            delta_S = S[-1] * (mu[t] + sigma[t] * dW[t])
+            
             S_new = S[-1] + delta_S
             S.append(S_new)
 
