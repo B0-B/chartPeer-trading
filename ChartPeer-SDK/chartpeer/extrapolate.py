@@ -293,7 +293,7 @@ try:
             # compile the model
             self.model.compile(optimizer='adam', loss='mean_squared_error')
         
-        def predict(self, data):
+        def predict(self, data, epochs=None):
 
             # ---- Parameters ---- #
             if type(data) is list:
@@ -302,6 +302,8 @@ try:
                 self.training_data_length = data.shape[0]
             else:
                 raise TypeError('data must be a 1d array or list!')
+            if epochs:
+                self.epochs = epochs
             # -------------------- #
 
 
@@ -371,21 +373,49 @@ except ImportError as e:
 
 
 
-def lstm_gbm (dataset, extra, generations=10, smoothing=14, epochs=20, batch_size=1, input_size=60):
+def lstm_gbm (dataset, feature_length, generations=10, smoothing=14, 
+              epochs=(20, 1), batch_size=1, input_size=60, deviation=1):
 
     '''
     LSTM sustained Geometric Brownian Motion Algorithm.
     Estimator is determined through Monte Carlo Simulation of 
-    extended GBM SDE. Time evolution of volatility and drift
-    are fitted with a RNN.
+    extended GBM SDE 
 
-    Parameters
+        dS(t) = S(t-1) * (mu(t) + sigma[t] * np.random.normal(0,1))
+    
+    with 1/sqrt(generations) uncertainty of the mean convergence and
+    1/sqrt(t) uncertainty growth over time. 
+    Time evolution of volatility and drift are fitted with a RNN.
 
-    input_size          The neural input size at which input slices
-                        should be sampled and propagated during training.
-                        This parameter might influence the efficiency,
+    Parameters:
+    -----------
+    dataset             1D array of closed prices 
+                        (if list was provided it will be converted to np.ndarray)
+    feature_length      Extrapolation length - will be applied to each MC generation 
+                        of length "feature_length" which will be meaned to a vector.
+    generations         Number of Monte Carlo generations. Larger values will converge
+                        closer to expected mean due to smaller standard error 1/sqrt(generations),
+                        but also volatility contributions will be smoothened out.
+    smoothing           Smoothing window for volatility and drift screening.
+    epochs              Tuple of epochs (epochs for volatility training, for drift training).
+                        The second element is usually smaller since drift training will used 
+                        pre-trained model from VIX prediction.
+    batch_size          Size of input-output tuples to propagate at once - higher batch times save time
+                        but during training converge in a more smooth way which fits multiple generations.
+                        Highest accuracy was observed with mini-batch training i. e. with batch_size=1. 
+    input_size          The neural input size at which input slices should be sampled and 
+                        propagated during training - the number of values from which the extra values
+                        should be estimated. This parameter might influence the efficiency,
                         but scales with the backpropagation time.
+
+    Return:
+    -------
+    Dict object with with keys mean, upper (bound), lower (bound) and their respective 1D arrays.
     '''
+
+    # convert to numpy array if list was provided
+    if type(dataset) is list:
+        dataset = np.array(dataset)
 
     # compute the volatility index by accounting volatilites across a window span
     # and simple average it, save into a numpy array
@@ -397,7 +427,7 @@ def lstm_gbm (dataset, extra, generations=10, smoothing=14, epochs=20, batch_siz
     vix = np.array(vol)
 
     # init lstm prediction
-    predictor = lstm(sequence_length=input_size, feature_length=extra, epochs=epochs, batch_size=batch_size)
+    predictor = lstm(sequence_length=input_size, feature_length=feature_length, epochs=epochs[0], batch_size=batch_size)
     vix_prediction = predictor.predict(vix)['prediction']
 
     # repeat the whole process for the drift resolvement
@@ -405,8 +435,7 @@ def lstm_gbm (dataset, extra, generations=10, smoothing=14, epochs=20, batch_siz
     for i in range(smoothing, len(dataset)):
         drifts.append(statistics.drift(np.array(dataset[i-smoothing:i])))
     # predictor = lstm(sequence_length=60, feature_length=30, epochs=30, batch_size=10)
-    drift_prediction = predictor.predict(drifts)['prediction']
-
+    drift_prediction = predictor.predict(drifts, epochs=epochs[1])['prediction']
 
     # Simulation of geometric brownian motion path.
     # Drift mu and volatility sigma vary over time are taken from LSTM fit.
@@ -420,8 +449,7 @@ def lstm_gbm (dataset, extra, generations=10, smoothing=14, epochs=20, batch_siz
 
         # start new generation
         S = [dataset[-1]]
-        for t in range(extra):
-
+        for t in range(feature_length):
             # improved stochastic differential equation with variable drift and volatility
             delta_S = S[-1] * (mu[t] + sigma[t] * np.random.normal(0,1))
             S_new = S[-1] + delta_S
@@ -429,10 +457,25 @@ def lstm_gbm (dataset, extra, generations=10, smoothing=14, epochs=20, batch_siz
 
         generationSet.append(np.array(S[1:]))
 
+    # convert generation set to array
     generationSet = np.array(generationSet)
 
     # mean estimate
     g = np.mean(generationSet, axis=0)
 
-    
     # compute the bounds
+    # define limits by the vix
+    upper_lim = []
+    lower_lim = []
+    for i in range(len(vix_prediction)):
+        uncertainty = np.sqrt(i)
+        upper_lim.append(g[i]*np.exp(deviation * vix_prediction[i] * uncertainty))
+        lower_lim.append(g[i]*np.exp(-deviation * vix_prediction[i] * uncertainty))
+    upper_lim = np.array(upper_lim)
+    lower_lim = np.array(lower_lim)
+    
+    return {
+        'mean': g,
+        'upper': upper_lim,
+        'lower': lower_lim
+    }
