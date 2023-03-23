@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
+
+import json
+import csv
 import numpy as np
 from pathlib import Path
+from traceback import print_exc
 import requests
-import csv
+from datetime import datetime
+# from urllib.error import HTTPError
+# from urllib.request import Request
+# import urllib.request as urllib2
+# import urllib.parse as urllib
+# import urllib
+
 
 class load:
 
@@ -42,15 +52,6 @@ class load:
         
         return data
     
-    def ohlcFromCryptoApi (symbol, refCurrency, interval=1440):
-
-        '''
-        Loads 720 recent ohlc candles from kraken API.
-        '''
-
-
-
-
     def closedFromFile (filename, delimiter=','):
 
         '''
@@ -74,5 +75,48 @@ class load:
             out.append(p[4])
         return np.array(out)
 
+class krakenApi:
+
+    '''
+    Loads crypto price data from kraken rest API.
+    Returns list of candle lists (time,o,h,l,c,avg,volume).
+    '''
+
+    krakenUrl = 'https://futures.kraken.com'
+
+    krakenSymbol = {
+        'BTC': 'XXBTZ',
+    }
+
+    def ohlc(symbol, interval, ref='USD', timeFormat='%Y-%m-%d %H:%M'):
+
+        '''
+        Requests OHLC timeseries data 720 points of chosen time intervals in minutes.
+        '''
+
+        if symbol.upper() in krakenApi.krakenSymbol:
+            symbol = krakenApi.krakenSymbol[symbol.upper()]
+        else:
+            symbol = symbol.upper()
+
+        pair = f'{symbol}{ref}'
+        response = requests.get(f'https://api.kraken.com/0/public/OHLC?pair={pair}&interval={interval}', headers={'Accept': 'application/json'})
+        pkg = response.json()
+
+        if len(pkg['error']) > 0:
+            raise ValueError(pkg['error'][0])
+
+        # unpack
+        ohlcData = list(pkg['result'].values())[0]
+        for i in range(len(ohlcData)):
+            ohlcData[i][0] = datetime.fromtimestamp(ohlcData[i][0]).strftime(timeFormat)
+            for j in range(1,7):
+                ohlcData[i][j] = float(ohlcData[i][j])
+        
+        return ohlcData
+
+
+
 if __name__ == '__main__':
-    print(load.loadOhlcFromFile('XBTUSD_1440.csv'))
+    # print(load.loadOhlcFromFile('XBTUSD_1440.csv'))
+    api = krakenApi.ohlc('xbt', 60)
