@@ -88,6 +88,7 @@ class krakenApi:
         'BTC': 'XXBTZ',
     }
 
+
     def ohlc(symbol, interval, ref='USD', timeFormat='%Y-%m-%d %H:%M'):
 
         '''
@@ -115,8 +116,30 @@ class krakenApi:
         
         return ohlcData
 
+    def price(symbol, ref='USD'):
+
+        '''
+        Requests latest price for symbol.
+        '''
+
+        if symbol.upper() in krakenApi.krakenSymbol:
+            symbol = krakenApi.krakenSymbol[symbol.upper()]
+        else:
+            symbol = symbol.upper()
+
+        pair = f'{symbol}{ref}'
+        response = requests.get(f'https://api.kraken.com/0/public/Ticker?pair={pair}', headers={'Accept': 'application/json'})
+        pkg = response.json()
+
+        if len(pkg['error']) > 0:
+            raise ValueError(pkg['error'][0])
+
+        # unpack
+        price = float(list(pkg['result'].values())[0]['c'][0])
+        
+        return price
 
 
 if __name__ == '__main__':
     # print(load.loadOhlcFromFile('XBTUSD_1440.csv'))
-    api = krakenApi.ohlc('xbt', 60)
+    api = krakenApi.price('xbt')
