@@ -44,3 +44,7 @@ plot.chart(data, name='bitcoin closed', predictionSets = {
 ```
 
 <img src='img/lstm.png'>
+
+## Examples
+
+More examples can be found within the [tutorial](https://github.com/B0-B/chartPeer-trading/blob/main/ChartPeer-SDK/tutorial.ipynb) and [live prediction](https://github.com/B0-B/chartPeer-trading/blob/main/ChartPeer-SDK/lstm_gbm_live_prediction.ipynb) notebooks.
