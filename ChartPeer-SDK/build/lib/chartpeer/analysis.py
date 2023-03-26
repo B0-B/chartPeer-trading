@@ -277,7 +277,7 @@ class indicators:
 
 class plot:
 
-    def chart (dataset, name='dataset', indicatorSets={}, predictionSets={}, timeset=None, savePath=None,
+    def chart (dataset, name='dataset', overlays={}, indicatorSets={}, predictionSets={}, timeset=None, savePath=None,
                title='Chart', renderLegend=True):
 
         # position is splitted at the end of dataset and where the prediction begins
@@ -320,6 +320,14 @@ class plot:
 
         # add main dataset to chart
         ax.plot(x_array[:L], y_array, color='#03c2fc', label=name)
+
+        # add overlay datasets
+        for name, overlay in overlays.items():
+            if type(overlay) is list:
+                L = len(overlay)
+            else:
+                L = overlay.shape[0]
+            ax.plot(x_array[:L], overlay, color='#03c2fc', label=name)
 
         # add all predictions accordingly
         for name, pred in predictionSets.items():

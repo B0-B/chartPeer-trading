@@ -374,7 +374,7 @@ except ImportError as e:
 
 
 def lstm_gbm (dataset, feature_length, generations=10, smoothing=14, 
-              epochs=(20, 10), batch_size=1, input_size=60, deviation=1):
+              epochs=(20, 10), batch_size=1, input_size=60, deviation=1, reuse_model=True):
 
     '''
     LSTM sustained Geometric Brownian Motion Algorithm.
@@ -434,6 +434,8 @@ def lstm_gbm (dataset, feature_length, generations=10, smoothing=14,
 
     # repeat the whole process for the drift resolvement
     # take the pre-trained lstm predictor and fit to drift 
+    if not reuse_model:
+        predictor = lstm(sequence_length=input_size, feature_length=feature_length, epochs=epochs[0], batch_size=batch_size)
     drifts = [] # array for moving avg. of the drift
     for i in range(smoothing, len(dataset)):
         drifts.append(statistics.drift(np.array(dataset[i-smoothing:i])))

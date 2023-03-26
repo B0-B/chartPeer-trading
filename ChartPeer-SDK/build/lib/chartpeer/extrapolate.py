@@ -30,23 +30,16 @@ def gbm (dataset, extra, n=1, sampling='normal'):
 
         for _ in range(n):
 
-            generation = []
-            drift = statistics.drift(dataset)
-            volatility = statistics.volatility(dataset)
-            wiener = np.random.norm(0, 1, extra)
+            mu = statistics.drift(dataset)
+            sigma = statistics.volatility(dataset)
 
-            for i in range(extra):
-
-                if len(generation) == 0:
-                    price = dataset[-1]
-                else:
-                    price = generation[-1]
-
-                vol = float(wiener[i] * volatility)
-                price_new = price * (1 + drift + vol)
-                generation.append(price_new)
-
-            generations.append(np.array(generation))
+            S = [dataset[-1]]
+            for t in range(n):
+                delta_S = S[-1] * (mu + sigma * np.random.normal(0,1))
+                S_new = S[-1] + delta_S
+                S.append(S_new)
+            
+            generations.append(np.array(S))
     
     elif sampling == 'intrinsic':
 
@@ -258,9 +251,7 @@ def hw_fit (dataset, extra, periodInIntervals=None, fitRange=[0,1]):
 
     return [alpha, beta, gamma]
 
-
 try:
-    
     
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # no warning printing
     from keras.models import Sequential
@@ -302,7 +293,7 @@ try:
             # compile the model
             self.model.compile(optimizer='adam', loss='mean_squared_error')
         
-        def predict(self, data):
+        def predict(self, data, epochs=None):
 
             # ---- Parameters ---- #
             if type(data) is list:
@@ -311,6 +302,8 @@ try:
                 self.training_data_length = data.shape[0]
             else:
                 raise TypeError('data must be a 1d array or list!')
+            if epochs:
+                self.epochs = epochs
             # -------------------- #
 
 
@@ -377,3 +370,176 @@ try:
 except ImportError as e:
 
     print('LSTM could not be loaded due to missing modules:', e)
+
+
+
+def lstm_gbm (dataset, feature_length, generations=10, smoothing=14, 
+              epochs=(20, 10), batch_size=1, input_size=60, deviation=1, reuse_model=True):
+
+    '''
+    LSTM sustained Geometric Brownian Motion Algorithm.
+    Estimator is determined through Monte Carlo Simulation of 
+    extended GBM SDE 
+
+        dS(t) = S(t-1) * (mu(t) + sigma[t] * np.random.normal(0,1))
+    
+    with 1/sqrt(generations) uncertainty of the mean convergence and
+    1/sqrt(t) uncertainty growth over time. 
+    Time evolution of volatility and drift are fitted with a RNN.
+
+    Parameters:
+    -----------
+    dataset             1D array of closed prices 
+                        (if list was provided it will be converted to np.ndarray)
+    feature_length      Extrapolation length - will be applied to each MC generation 
+                        of length "feature_length" which will be meaned to a vector.
+    generations         Number of Monte Carlo generations. Larger values will converge
+                        closer to expected mean due to smaller standard error 1/sqrt(generations),
+                        but also volatility contributions will be smoothened out.
+    smoothing           Smoothing window for volatility and drift screening.
+    epochs              Tuple of epochs (epochs for volatility training, for drift training).
+                        The second element is usually smaller since drift training will used 
+                        pre-trained model from VIX prediction.
+    batch_size          Size of input-output tuples to propagate at once - higher batch times save time
+                        but during training converge in a more smooth way which fits multiple generations.
+                        Highest accuracy was observed with mini-batch training i. e. with batch_size=1. 
+    input_size          The neural input size at which input slices should be sampled and 
+                        propagated during training - the number of values from which the extra values
+                        should be estimated. This parameter might influence the efficiency,
+                        but scales with the backpropagation time.
+
+    Return:
+    -------
+    Dict object with with keys mean, upper (bound), lower (bound) and their respective 1D arrays.
+    '''
+
+    # convert to numpy array if list was provided
+    if type(dataset) is list:
+        dataset = np.array(dataset)
+
+
+
+    # compute the volatility index by accounting volatilites across a window span
+    # and simple average it, save into a numpy array
+    vol = []
+    for i in range(smoothing, len(dataset)):
+        slicedSet = np.array(dataset[i-smoothing:i])
+        v = statistics.volatility(slicedSet)
+        vol.append(v)
+    vix = np.array(vol)
+
+    # init lstm prediction
+    predictor = lstm(sequence_length=input_size, feature_length=feature_length, epochs=epochs[0], batch_size=batch_size)
+    vix_prediction = predictor.predict(vix)['prediction']
+
+    # repeat the whole process for the drift resolvement
+    # take the pre-trained lstm predictor and fit to drift 
+    if not reuse_model:
+        predictor = lstm(sequence_length=input_size, feature_length=feature_length, epochs=epochs[0], batch_size=batch_size)
+    drifts = [] # array for moving avg. of the drift
+    for i in range(smoothing, len(dataset)):
+        drifts.append(statistics.drift(np.array(dataset[i-smoothing:i])))
+    drift_prediction = predictor.predict(drifts, epochs=epochs[1])['prediction']
+
+
+
+    # construct the intrinsic cummulated probability distribution from
+    # the set of logarithmic returns. From each log return subtract the 
+    # expected drift and devide by the standard deviation (sampled drift and volatility)
+    # to obtain the intrinsic wiener probability distribution, this will be similar but 
+    # different from a standard normal distribution.  
+    returnIncrement = 0.0001
+    logReturns = []
+    for i in range(len(dataset)-1):
+        logReturns.append(np.log(dataset[i+1]/dataset[i]))
+    
+    # convert log-returns to standard normal values.
+    # At this step the characteristic wiener process i.e.
+    # the origin distribution is modelled, by subtracting and deviding
+    # geometric brownian expectation values.
+    logReturns = np.array(logReturns)
+    mu = np.mean(logReturns)
+    sigma = np.std(logReturns)
+    logReturns = logReturns - mu
+    logReturns = logReturns / sigma
+
+    # count occurrences for likelihoods+,
+     
+    start, stop = np.min(logReturns), np.max(logReturns)
+    returnRange = stop - start
+    bins = int(returnRange/returnIncrement) + 1
+    returnSpace = np.linspace(start, stop, bins)
+    likelihood = np.zeros((bins,))
+    for r in logReturns:
+        for pointer in range(bins-1):
+            if r < returnSpace[pointer+1] and r > returnSpace[pointer]:
+                likelihood[pointer] = likelihood[pointer] + 1
+                break
+    N = len(logReturns)
+    likelihood = [val/N for val in likelihood]  # normalize
+
+    # build cummulative distribution function
+    cummulativeDistribution = [likelihood[0]]
+    for i in range(1, len(likelihood)):
+        cummulativeDistribution.append(cummulativeDistribution[-1]+likelihood[i])
+
+
+
+    # Simulation of geometric brownian motion path.
+    # Drift mu and volatility sigma vary over time and are taken from LSTM fit.
+    # The differential equation is fixed accordingly.
+    mu = drift_prediction
+    sigma = vix_prediction
+
+    
+    generationSet = []
+
+    for g in range(generations):
+
+        # start new generation
+        S = [dataset[-1]]
+
+        # generate a sequence of wiener values from intrinsic distribution
+        # using an inverse sampling method from the inverse of the cummulative distribution
+        dW = []
+        for _ in range(feature_length):    
+            u = np.random.uniform(0,1)
+            r = 0
+            for i in range(len(cummulativeDistribution)):
+                if u < cummulativeDistribution[i]:
+                    r = returnSpace[i]
+                    break  
+            dW.append(r)         
+        for t in range(feature_length):
+
+            # improved stochastic differential equation with variable drift and volatility.
+            # The wiener increment dW originates from the extracted intrinsic distribution.
+            delta_S = S[-1] * (mu[t] + sigma[t] * dW[t])
+            
+            S_new = S[-1] + delta_S
+            S.append(S_new)
+
+        generationSet.append(np.array(S[1:]))
+
+    # convert generation set to array
+    generationSet = np.array(generationSet)
+
+    # mean estimate
+    g = np.mean(generationSet, axis=0)
+
+    # compute the bounds
+    # define limits by the vix
+    upper_lim = []
+    lower_lim = []
+    for i in range(len(vix_prediction)):
+        uncertainty = np.sqrt(i)
+        upper_lim.append(g[i]*np.exp(deviation * vix_prediction[i] * uncertainty))
+        lower_lim.append(g[i]*np.exp(-deviation * vix_prediction[i] * uncertainty))
+    upper_lim = np.array(upper_lim)
+    lower_lim = np.array(lower_lim)
+    
+    return {
+        'mean': g,
+        'upper': upper_lim,
+        'lower': lower_lim
+    }
