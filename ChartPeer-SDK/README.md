@@ -15,9 +15,12 @@ Works great in Jupyter environments (also see [VSCode Extension](https://github.
 # Getting Started
 ## Install 
 ```bash
-git clone https://github.com/B0-B/chartPeer-trading/chartpeer-sdk 
-cd chartpeer-sdk
-python setup.py install
+git clone https://github.com/B0-B/chartPeer-trading 
+cd chartPeer-trading/ChartPeer-SDK 
+# on windows
+python setup.py install 
+# on debian
+sudo python3 setup.py install
 ```
 
 ## Usage
