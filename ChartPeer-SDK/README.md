@@ -45,6 +45,38 @@ plot.chart(data, name='bitcoin closed', predictionSets = {
 
 <img src='img/lstm.png'>
 
+Obviously generic LSTM can be quiet off, hence `lstm_gmb` offers a new geometric brownian motion algorithm supported by LSTM for improved timeseries prediction. Read the paper [LSTM-driven Monte Carlo for Geometric Timeseries Forecast](). The following code example requests recent bitcoin price data and predicts the outcome.
+
+```python
+from chartpeer.loader import krakenApi, load
+from chartpeer.extrapolate import lstm_gbm
+from chartpeer.analysis import plot
+
+# load ohlc and convert to closed prices
+ohlc = krakenApi.ohlc('BTC', 60)
+closed = load.closedFromOhlc(ohlc)[-365:]
+
+# predict for 14 intervals of e.g. minutes, hours, days etc.
+feature_length = 14
+smoothing = 10
+
+# split into Input (for training) and target set
+Input = closed[:-feature_length]
+target = closed[-feature_length:]
+
+# train for 20 epochs volatility, and 10 epochs the geometric trend
+output = lstm_gbm(Input, feature_length, epochs=(20,10), smoothing=smoothing)
+
+plot.chart(Input, predictionSets = {
+    'Real Continuation': target,
+    'Mean LSTM GBM': output['mean'],
+    'Upper Volatility Band': output['upper'],
+    'Lower Volatility Band': output['lower']
+})
+```
+<img src='img/lstm_gbm.png'>
+
+
 ## Examples
 
 More examples can be found within the [tutorial](https://github.com/B0-B/chartPeer-trading/blob/main/ChartPeer-SDK/tutorial.ipynb) and [live prediction](https://github.com/B0-B/chartPeer-trading/blob/main/ChartPeer-SDK/lstm_gbm_live_prediction.ipynb) notebooks.

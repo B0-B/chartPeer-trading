@@ -12,11 +12,12 @@ Conventions:
 
 import numpy as np
 import matplotlib.pyplot as plt
+from typing import Callable
 
 
 class profit:
 
-    def pnl (entryPrice, exitPrice, size, side):
+    def pnl (entryPrice:float, exitPrice:float, size:float|int, side:str) -> float:
 
         '''
         Profit and Loss computation for futures, derivatives or options trading.
@@ -39,7 +40,7 @@ class profit:
             raise ValueError(f'Provided side must be "buy" or "sell", not {side}')
         return PnL
 
-    def roi (entryPrice, exitPrice):
+    def roi (entryPrice:float, exitPrice:float) -> float:
 
         '''
         Return on Invest.
@@ -48,12 +49,12 @@ class profit:
         https://en.wikipedia.org/wiki/Return_on_investment
         '''
 
-        return (exitPrice-entryPrice)/entryPrice
+        return exitPrice / entryPrice - 1
 
 
 class regression:
 
-    def chi2(arg, dataSet, model):
+    def chi2(arg, dataset:np.ndarray, model:Callable) -> float:
         '''
         Sum over all square elements is distributed according to 
         the chi-squared distribution with k degrees of freedom.
@@ -61,16 +62,18 @@ class regression:
         Returns a scalar (float).
         '''
         out = []
-        for i in range(len(dataSet)):
-            out.append( (dataSet[i]-model(arg, i))**2 )
+        for i in range(dataset.shape[0]):
+            out.append( (dataset[i]-model(arg, i))**2 )
         return sum(out)
 
-    def linear (dataset, extrapolate=0):
+    def linear (dataset:np.ndarray|list, extrapolate:int=0) -> list:
+
         '''
         Improved linear regression fit.
         1. The linear fit should intersect the dataSet's mean which lies at the x range median -> anchor point
         2. Rotate the linear model around the anchor to minimize the chi squared. This saves iterating over a whole parameter.
         '''
+
         # define ranges
         if type(dataset) is np.ndarray:
             l = dataset.shape[0]
@@ -90,7 +93,7 @@ class regression:
         c = statistics.meanSquaredDistance(alpha, dataset, model)
         while alpha < a_range[1]:
             alpha += a_step
-            c_new = tools.chiSquared(alpha, dataset, model)
+            c_new = regression.chiSquared(alpha, dataset, model)
             if  c_new < c:
                 c = c_new
                 alpha_best = alpha
@@ -101,7 +104,7 @@ class regression:
 
 class statistics:
 
-    def drift (dataset):
+    def drift (dataset:list):
 
         '''
         Percentage Drift Implementation.
@@ -112,40 +115,40 @@ class statistics:
 
         return statistics.mean(statistics.logReturns(dataset))
 
-    def mean (dataset, *args, **kwargs):
+    def mean (dataset, *args, **kwargs) -> np.ndarray:
         '''
         Numpy mean alias.
         '''
         return np.mean(dataset, *args, **kwargs)
 
-    def meanSquaredDistance (dataset1, dataset2):
+    def meanSquaredDistance (dataset1:np.ndarray, dataset2:np.ndarray):
         '''
         Sum over all square elements is distributed according to 
         the chi-squared distribution with k degrees of freedom.
 
         Returns a scalar (float).
         '''
-        if dataset1.shape[0] != dataset2.shape[1]:
+        if dataset1.shape[0] != dataset2.shape[0]:
             raise ValueError(f'Provided datasets need to have different size, but {dataset1.shape[0]} and {dataset2.shape[1]} were provided!')
         out = []
-        for i in range(len(dataset1)):
+        for i in range(dataset1.shape[0]):
             out.append( (dataset1[i]-dataset2[i])**2 )
         return sum(out)
 
-    def logReturns (dataset):
+    def logReturns (dataset:np.ndarray) -> np.ndarray:
 
         '''
         Computes the logarithmic returns.
         Returns a 1D array
-        numpyp.ndarray([ log(d[1]/d[0], log(d[2]/d[1]), ... ])
+        numpy.ndarray([ log(d[1]/d[0], log(d[2]/d[1]), ... ])
         '''
 
         out = []
-        for i in range(len(dataset)-1):
+        for i in range(dataset.shape[0]-1):
             out.append(np.log(dataset[i+1]/dataset[i]))
         return np.array(out)
 
-    def sampleVariance (dataset, correction=1):
+    def sampleVariance (dataset:list|np.ndarray, correction:int=1) -> float:
         '''
         Sample variance.
         The correction factor refers to Bessel's correction 1/(n-1) (default).
@@ -153,14 +156,14 @@ class statistics:
         '''
         return np.std(dataset, ddof=correction)
 
-    def standardDeviation (dataset):
+    def standardDeviation (dataset:list|np.ndarray) -> float:
         '''
         Return the standard deviation obtained from sample variance.
         '''
 
         return np.std(dataset)
     
-    def volatility(dataset):
+    def volatility(dataset:list) -> float:
 
         '''
         Computes the expected/meaned percentage volatility per element.
@@ -171,7 +174,7 @@ class statistics:
 
 class indicators:
 
-    def ema (dataset, window):
+    def ema (dataset:list|np.ndarray, window:int=14) -> np.ndarray:
 
         '''
         Exponential Moving Average.
@@ -179,10 +182,11 @@ class indicators:
         '''
 
         a, out = 2/(window+1), [dataset[1]]
-        for d in dataset[1:]: out.append(a*d+(1-a)*out[-1])
-        return np.out
+        for d in dataset[1:]: 
+            out.append(a*d+(1-a)*out[-1])
+        return np.array(out)
     
-    def klinger(self, dataset, fastPeriod=34, slowPeriod=55, signalPeriod=13):
+    def klinger(dataset:np.ndarray, fastPeriod:int=34, slowPeriod:int=55, signalPeriod:int=13) -> list:
         
         '''
         Klinger Volume Oscillator Implementation.
@@ -227,24 +231,26 @@ class indicators:
         
         return [osc[-1]-oscSlow[-1], osc, oscSlow]
 
-    def macd (dataset, signalPeriod=12, slowPeriod=26, macdPeriod=9):
+    def macd (dataset:np.ndarray, signalPeriod:int=12, slowPeriod:int=26, macdPeriod:int=9) -> np.ndarray:
         '''
         MACD implementation with typical period parameters.
         The most commonly used periods (default) are 12, 26, 9, respectively.
         Returns 1D array of difference between signal and slow oscillator.
         '''
-        signal, slow = np.array(indicators.ema(dataset, signalPeriod)), np.array(indicator.ema(closed, slowPeriod))
+        signal, slow = np.array(indicators.ema(dataset, signalPeriod)), np.array(indicators.ema(dataset, slowPeriod))
         macd_sig = signal - slow
         macd_slow = np.array(indicators.ema(macd_sig, macdPeriod))
         return macd_sig - macd_slow
 
-    def rsi (dataset, window=14):
+    def rsi (dataset:np.ndarray, window:int=14) -> np.ndarray:
+
         '''
         Relative Strength Index Implementation.
         Returns time-resolved 1D array with RSI values between 0 and 100.
         '''
+
         u,d,rsi=[],[],[]
-        for i in range(1,len(dataset)):
+        for i in range(1,dataset.shape[0]):
             c = dataset[i] - dataset[i-1]
             if c > 0:
                 u.append(c)
@@ -263,7 +269,7 @@ class indicators:
                 rsi.append(100*(1-1/(1+u[i]/d[i])))
         return np.array(rsi)
 
-    def sma (dataset, window):
+    def sma (dataset:np.ndarray, window:int=14) -> np.ndarray:
 
         '''
         Simple moving average implementation.
@@ -272,13 +278,18 @@ class indicators:
         out = []
         for i in range(window, dataset.shape[0]):
             out.append(np.mean(dataset[i-window:i]))
-        return out
+        return np.array(out)
 
 
 class plot:
 
-    def chart (dataset, name='dataset', overlays={}, color='b', indicatorSets={}, predictionSets={}, 
-               timeset=None, savePath=None, title='Chart', renderLegend=True):
+    def chart (dataset:np.ndarray, name:str='dataset', overlays:dict={}, color:str='b', indicatorSets:dict={}, predictionSets:dict={}, 
+               timeset:np.ndarray=None, savePath:str=None, title:str='Chart', renderLegend:bool=True) -> None:
+        
+        '''
+        Plots a standardized dataset with corresponding timeline (x-axis) and indicator arrays.
+        The figure can be saved, if there is a GUI it will be shown.
+        '''
 
         # position is splitted at the end of dataset and where the prediction begins
         L = dataset.shape[0]
