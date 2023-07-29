@@ -27,7 +27,7 @@ class load:
         'BTC': 'XXBTZ',
     }
 
-    def ohlcFromFile (filename, delimiter=','):
+    def ohlcFromFile (filename:str, delimiter:str=',') -> list:
 
         '''
         Loads CSV file and splits all rows to list objects 
@@ -52,7 +52,7 @@ class load:
         
         return data
     
-    def closedFromFile (filename, delimiter=','):
+    def closedFromFile (filename:str, delimiter:str=',') -> list:
 
         '''
         Returns 1D numpy array of closed prices from file.
@@ -63,7 +63,7 @@ class load:
             out.append(p[4])
         return np.array(out)
 
-    def closedFromOhlc (ohlc):
+    def closedFromOhlc (ohlc:list) -> list:
 
         '''
         Returns 1D numpy array of closed prices from previously determined OHLC data.
@@ -89,7 +89,7 @@ class krakenApi:
     }
 
 
-    def ohlc(symbol, interval, ref='USD', timeFormat='%Y-%m-%d %H:%M'):
+    def ohlc (symbol:str, interval:int, ref:str='USD', timeFormat:str='%Y-%m-%d %H:%M') -> list:
 
         '''
         Requests OHLC timeseries data 720 points of chosen time intervals in minutes.
@@ -116,7 +116,7 @@ class krakenApi:
         
         return ohlcData
 
-    def price(symbol, ref='USD'):
+    def price(symbol:str, ref:str='USD') -> float:
 
         '''
         Requests latest price for symbol.

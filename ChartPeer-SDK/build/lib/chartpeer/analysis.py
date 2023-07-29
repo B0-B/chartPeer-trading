@@ -54,7 +54,7 @@ class profit:
 
 class regression:
 
-    def chi2(arg, dataset:np.ndarray, model:Callable) -> float:
+    def chi2(arg:any, dataset:np.ndarray, model:Callable) -> float:
         '''
         Sum over all square elements is distributed according to 
         the chi-squared distribution with k degrees of freedom.
@@ -104,7 +104,7 @@ class regression:
 
 class statistics:
 
-    def drift (dataset:list):
+    def drift (dataset:np.ndarray) -> float:
 
         '''
         Percentage Drift Implementation.
@@ -115,13 +115,13 @@ class statistics:
 
         return statistics.mean(statistics.logReturns(dataset))
 
-    def mean (dataset, *args, **kwargs) -> np.ndarray:
+    def mean (dataset:list, *args, **kwargs) -> np.ndarray:
         '''
         Numpy mean alias.
         '''
         return np.mean(dataset, *args, **kwargs)
 
-    def meanSquaredDistance (dataset1:np.ndarray, dataset2:np.ndarray):
+    def meanSquaredDistance (dataset1:np.ndarray, dataset2:np.ndarray) -> float:
         '''
         Sum over all square elements is distributed according to 
         the chi-squared distribution with k degrees of freedom.
