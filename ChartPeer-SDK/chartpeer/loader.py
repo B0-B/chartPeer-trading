@@ -139,6 +139,56 @@ class krakenApi:
         
         return price
 
+class alphaVantage:
+
+    '''
+    General stock data API. 
+    '''
+
+    def __init__ (self, api_key:str|None=None) -> None:
+
+        if not api_key:
+            raise ValueError('Please claim an alphaVantage API key here https://www.alphavantage.co/support/#api-key')
+        self.avKey = 'V1UUOJF8DY7G75OO'
+        self.data = []
+    
+    def findSymbol (self, suggestion:str) -> list:
+
+        '''
+        Returns a list of stock/ticker symbols from different markets.
+        '''
+
+        endpoint = f'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={suggestion}&apikey={self.avKey}'
+        response = requests.get( endpoint )
+        return response.json()['bestMatches']
+
+    def getStockData (self, symbol:str, interval:int=5) -> list:
+
+        '''
+        Returns the last 30 days of stock data (time,o,h,l,c,v)
+        from alphaVantage API. Data is saved in global .data object.
+        '''
+
+        endpoint = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval={interval}min&outputsize=full&apikey={self.avKey}'
+
+        # make request and unpack data
+        response = requests.get( endpoint )
+        data = response.json()
+        timeseries = data[f'Time Series ({interval}min)']
+        
+        dataset = []
+
+        for k, v in timeseries.items():
+            v = list(v.values())
+            dataset.append([k]+[float(v[i]) for i in range(5)])
+        dataset.reverse()
+
+        # override global dataset
+        self.data = dataset
+
+        return dataset
+
+
 
 if __name__ == '__main__':
     # print(load.loadOhlcFromFile('XBTUSD_1440.csv'))
