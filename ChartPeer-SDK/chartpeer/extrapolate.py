@@ -372,8 +372,6 @@ except ImportError as e:
 
     print('LSTM could not be loaded due to missing modules:', e)
 
-
-
 def lstm_gbm (dataset, feature_length, generations=10, smoothing=14, 
               epochs=(20, 10), batch_size=1, input_size=60, deviation=1, reuse_model=True):
 
