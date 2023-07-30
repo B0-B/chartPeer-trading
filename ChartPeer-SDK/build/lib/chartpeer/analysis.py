@@ -11,6 +11,7 @@ Conventions:
 '''
 
 import numpy as np
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from typing import Callable
 
@@ -51,7 +52,6 @@ class profit:
 
         return exitPrice / entryPrice - 1
 
-
 class regression:
 
     def chi2(arg:any, dataset:np.ndarray, model:Callable) -> float:
@@ -75,10 +75,9 @@ class regression:
         '''
 
         # define ranges
-        if type(dataset) is np.ndarray:
-            l = dataset.shape[0]
-        else:
-            l = len(dataset)
+        if type(dataset) is not np.ndarray:
+            dataset = np.array(dataset)
+        l = dataset.shape[0]
         m = np.mean(dataset) # from montecarlo
         Raise = ( dataset[-1] - dataset[0] ) / l # crude but fast estimate
         a_range = ( Raise*0.8, Raise*1.2) # +/-20% window
@@ -90,17 +89,39 @@ class regression:
 
         alpha = a_range[0]
         alpha_best = alpha
-        c = statistics.meanSquaredDistance(alpha, dataset, model)
+        c = regression.chi2(alpha, dataset, model)
         while alpha < a_range[1]:
             alpha += a_step
-            c_new = regression.chiSquared(alpha, dataset, model)
+            c_new = regression.chi2(alpha, dataset, model)
             if  c_new < c:
                 c = c_new
                 alpha_best = alpha
-            
         
         return [model(alpha_best, x) for x in range(l+extrapolate)]
 
+    def exp (dataset:np.ndarray|list, extrapolate:int=0, sign=-1) -> np.ndarray:
+
+        '''
+        Performs an exponential fit by using the model function
+        a * exp( -b * x ) + c.
+
+        Returns an extended array with fit values.
+        '''
+
+        if type(dataset) is not np.ndarray:
+            dataset = np.array(dataset)
+
+        # define exponential fit model
+        def model (x, a, b, c):
+            return a * np.exp(sign * b * x) + c
+        
+        x = np.arange(dataset.shape[0])
+        popt, pcov = curve_fit(model, x, dataset)   
+
+        x_ext = np.concatenate((x, np.arange(dataset.shape[0], dataset.shape[0] + extrapolate)), axis=0)
+
+        print(popt)
+        return np.array([model(x, *popt) for x in x_ext])
 
 class statistics:
 
@@ -128,6 +149,8 @@ class statistics:
 
         Returns a scalar (float).
         '''
+
+
         if dataset1.shape[0] != dataset2.shape[0]:
             raise ValueError(f'Provided datasets need to have different size, but {dataset1.shape[0]} and {dataset2.shape[1]} were provided!')
         out = []
@@ -170,7 +193,6 @@ class statistics:
         '''
 
         return statistics.standardDeviation(statistics.logReturns(dataset))
-
 
 class indicators:
 
@@ -280,11 +302,10 @@ class indicators:
             out.append(np.mean(dataset[i-window:i]))
         return np.array(out)
 
-
 class plot:
 
     def chart (dataset:np.ndarray, name:str='dataset', overlays:dict={}, color:str='b', indicatorSets:dict={}, predictionSets:dict={}, 
-               timeset:np.ndarray=None, savePath:str=None, title:str='Chart', renderLegend:bool=True) -> None:
+               timeset:np.ndarray|None=None, savePath:str=None, title:str='Chart', renderLegend:bool=True) -> None:
         
         '''
         Plots a standardized dataset with corresponding timeline (x-axis) and indicator arrays.
@@ -301,11 +322,13 @@ class plot:
                 maxPredictionLength = pred.shape[0]
             elif len(pred) > maxPredictionLength:
                 maxPredictionLength = len(pred)
-        
+        for o in overlays.values():
+            if type(o) is np.ndarray and o.shape[0]-L > maxPredictionLength:
+                maxPredictionLength = o.shape[0]-L
+            elif len(o)-L > maxPredictionLength:
+                maxPredictionLength = len(o)-L
         # define all arrays
-        if timeset:
-            if timeset.shape[0] != L:
-                raise ValueError(f'dataset and timeset have to match in length, provided {L} and {timeset.shape[0]} do not match!')
+        if type(timeset) == np.ndarray:
             x_array = timeset
             x_extra = np.array([str(i+1) for i in range(maxPredictionLength)])
         else:

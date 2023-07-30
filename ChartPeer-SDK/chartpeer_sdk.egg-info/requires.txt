@@ -1,5 +1,0 @@
-numpy
-scipy
-tensorflow
-keras
-sklearn

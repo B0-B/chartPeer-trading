@@ -47,8 +47,6 @@ The price of one instrument is assumed to be non-zero and discretely and equidis
 
 In  general the "market" consists of the risk market or asset (stock, security, commodity etc.) and the risk-free market or instrument allowing for direct exchange between both markets. Thus the price of the risky asset can be measured in stock units of the risk-free market (something stable e.g. USD bond) and is assumed to be non-zero and discretely and equidistantly seperated by constant intervals of time $\Delta t$. This helps in the following definitions as $t \in \mathbb{N}$ acts as a natural discrete index such that the total time is mapped in linear increments $T \coloneqq t \cdot \Delta t$ with $\Delta t \in \mathbb{R}$. Prices will be denoted as $S_{t} \in \mathbb{Q}^+$ and can be related (dynamically) through the discrete evolution of time as $S_{t+1} \leftarrow S_{t}$.
 
-Before introducing geometric brownian motion and black scholes theory 
-In general, note that timeseries values can be interpreted in two ways: absolutely or relatively (successor price relators) - latter method was successfully used in in pure and applied mathematics, such as finance and other timeseries forecasts. Where the expected mean needs to be corrected geometrically (see Kelly Criterion). In hedging positions it can be shown that the proper quantitative risk management allows for more profitable decision making.
 
 A geometric and discrete time step is said to be stationary if it can be expressed recursively, between all consecutive steps the relation is preserved as 
 

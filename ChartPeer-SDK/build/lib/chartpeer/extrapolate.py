@@ -4,7 +4,7 @@ import os, sys
 import numpy as np
 from chartpeer.analysis import statistics
 
-def gbm (dataset, extra, n=1, sampling='normal'):
+def gbm (dataset:np.ndarray, extra:int, n:int=1, sampling:str='normal') -> np.ndarray:
 
     '''
     Geometric Brownian Motion.
@@ -45,10 +45,11 @@ def gbm (dataset, extra, n=1, sampling='normal'):
 
         # construct intrinsic probability distribution
         # from the cummulative inverse
-        logReturns = []
-        for i in range(len(dataset)-1):
-            logReturns.append(np.log(dataset[i+1]/dataset[i]))
-        logReturns = np.array(logReturns)
+        logReturns = statistics.logReturns(dataset)
+        # logReturns = []
+        # for i in range(len(dataset)-1):
+        #     logReturns.append(np.log(dataset[i+1]/dataset[i]))
+        # logReturns = np.array(logReturns)
         returnIncrement = 0.0001
         start, stop = np.min(logReturns), np.max(logReturns)
         returnRange = stop - start
@@ -60,7 +61,7 @@ def gbm (dataset, extra, n=1, sampling='normal'):
                 if r < returnSpace[pointer+1] and r > returnSpace[pointer]:
                     likelihood[pointer] = likelihood[pointer] + 1
                     break
-        N = len(logReturns)
+        N = logReturns.shape[0]
         likelihood = [val/N for val in likelihood]  # normalize
 
         # build cummulative distribution function
@@ -101,7 +102,7 @@ def gbm (dataset, extra, n=1, sampling='normal'):
         return np.array(generations[0])
     return np.array(generations)
 
-def gbmBracket (gbm, limitPrice, stopPrice):
+def gbmBracket (gbm:np.ndarray, limitPrice:float, stopPrice:float) -> dict: 
 
     '''
     Compute likelihood statistics for a price bracket, based on gbm generations.
@@ -122,7 +123,7 @@ def gbmBracket (gbm, limitPrice, stopPrice):
         'stop': l/len(gbm),
         'std_err': 1/np.sqrt(len(gbm))}
 
-def hw (dataset, extra, alpha, beta, gamma, periodInIntervals=None): 
+def hw (dataset:np.ndarray, extra:int, alpha:float, beta:float, gamma:float, periodInIntervals:int|None=None) -> np.ndarray: 
 
     '''
     Holt Winters Algorithm.
@@ -179,7 +180,7 @@ def hw (dataset, extra, alpha, beta, gamma, periodInIntervals=None):
         pred.append((S[-1] + k*B[-1]) * C[(T-L+1+(k-1))%L])
     return np.array(pred)
 
-def hw_fit (dataset, extra, periodInIntervals=None, fitRange=[0,1]):
+def hw_fit (dataset:np.ndarray, extra:int, periodInIntervals:int|None=None, fitRange:list=[0,1]) -> list:
 
     '''
     A spectral winters fit algorithm for [alpha, beta, gamma].
@@ -370,8 +371,6 @@ try:
 except ImportError as e:
 
     print('LSTM could not be loaded due to missing modules:', e)
-
-
 
 def lstm_gbm (dataset, feature_length, generations=10, smoothing=14, 
               epochs=(20, 10), batch_size=1, input_size=60, deviation=1, reuse_model=True):
