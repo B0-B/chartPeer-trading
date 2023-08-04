@@ -29,7 +29,8 @@ pip_dependencies = [
     'scipy',
     'tensorflow',
     'keras',
-    'sklearn'
+    'sklearn',
+    'requests'
 ]
 
 # run the setup
