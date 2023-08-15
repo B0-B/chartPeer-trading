@@ -29,7 +29,7 @@ pip_dependencies = [
     'scipy',
     'tensorflow',
     'keras',
-    'sklearn',
+    'scikit-learn',
     'requests'
 ]
 
