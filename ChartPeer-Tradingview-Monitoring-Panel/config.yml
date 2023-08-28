@@ -3,22 +3,32 @@
 assets:
   # put any asset on your watch list
   # search for assets here: 
-  - KRAKEN:XBTEUR
-  - KRAKEN:TRXEUR
-  - KRAKEN:DOTEUR
-  - KRAKEN:XRPEUR
-  - KRAKEN:AAVEEUR
-  - KRAKEN:LSKEUR
-  - KRAKEN:ICXEUR
-  - KRAKEN:MLNEUR
-  - KRAKEN:XLMEUR
-  - KRAKEN:SCEUR
-  - KRAKEN:NANOEUR
-  - KRAKEN:ADAEUR
-  - KRAKEN:MLNEUR
-  - KRAKEN:XMREUR
-  - KRAKEN:GRTEUR
-  - KRAKEN:KNCEUR
+  - SPY
+  - GOLD
+  - USOIL
+  - CGW
+  - AAPL
+  - ABNB
+  - AMD
+  - AMZN
+  - BABA
+  - BAC
+  - BLK
+  - BRK.A
+  - COKE
+  - ETSY
+  - HAG
+  - INTC
+  - LMT
+  - MSFT
+  - NGLB
+  - NFLX 
+  - NVDA
+  - TSFA
+  - TSLA
+  - TTWO
+  - UBER
+  - WMT
 
 background: rgba(0, 0, 0, 1)  
 
