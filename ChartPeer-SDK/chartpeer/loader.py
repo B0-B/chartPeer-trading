@@ -261,5 +261,7 @@ class alphaVantage:
 
 
 if __name__ == '__main__':
+    
     # print(load.loadOhlcFromFile('XBTUSD_1440.csv'))
     #api = krakenApi.price('xbt')
+    pass
