@@ -145,6 +145,8 @@ class alphaVantage:
     General stock data API. 
     '''
 
+    url = 'https://www.alphavantage.co'
+
     def __init__ (self, api_key:str|None=None) -> None:
 
         if not api_key:
@@ -162,6 +164,73 @@ class alphaVantage:
         response = requests.get( endpoint )
         return response.json()['bestMatches']
 
+    def getFundamentals (self, symbol:str) -> dict:
+
+        '''
+        Returns the company information, financial ratios, and other key metrics for the equity specified. 
+        Data is generally refreshed on the same day a company reports its latest earnings and financials. 
+        
+        Format:
+
+        {
+            'Symbol': 'AMD', 
+            'AssetType': 'Common Stock', 
+            'Name': 'Advanced Micro Devices Inc', 
+            'Description': "Advanced Micro Devices, Inc. (AMD) is an American multinational semiconductor company based in Santa Clara, California, that develops computer processors and related technologies for business and consumer markets. AMD's main products include microprocessors, motherboard chipsets, embedded processors and graphics processors for servers, workstations, personal computers and embedded system applications.", 
+            'CIK': '2488', 
+            'Exchange': 'NASDAQ', 
+            'Currency': 'USD', 
+            'Country': 'USA', 
+            'Sector': 'MANUFACTURING', 
+            'Industry': 'SEMICONDUCTORS & RELATED DEVICES', 
+            'Address': '2485 AUGUSTINE DRIVE, SANTA CLARA, CA, US', 
+            'FiscalYearEnd': 'December', 
+            'LatestQuarter': '2023-06-30', 
+            'MarketCapitalization': '165202264000', 
+            'EBITDA': '3100000000', 
+            'PERatio': 'None', 
+            'PEGRatio': '0.902', 
+            'BookValue': '34.16', 
+            'DividendPerShare': '0', 
+            'DividendYield': '0', 
+            'EPS': '-0.04', 
+            'RevenuePerShareTTM': '13.55', 
+            'ProfitMargin': '-0.0011', 
+            'OperatingMarginTTM': '-0.0173', 
+            'ReturnOnAssetsTTM': '-0.0035', 
+            'ReturnOnEquityTTM': '-0.0005', 
+            'RevenueTTM': '21876001000', 
+            'GrossProfitTTM': '12051000000', 
+            'DilutedEPSTTM': '-0.04', 
+            'QuarterlyEarningsGrowthYOY': '-0.938', 
+            'QuarterlyRevenueGrowthYOY': '-0.182', 
+            'AnalystTargetPrice': '127.48', 
+            'TrailingPE': '-', 
+            'ForwardPE': '18.02', 
+            'PriceToSalesRatioTTM': '4.699', 
+            'PriceToBookRatio': '2.038', 
+            'EVToRevenue': '4.75', 
+            'EVToEBITDA': '18.86', 
+            'Beta': '1.822', 
+            '52WeekHigh': '132.83', 
+            '52WeekLow': '54.57', 
+            '50DayMovingAverage': '112.1', 
+            '200DayMovingAverage': '92.19', 
+            'SharesOutstanding': '1610360000', 
+            'DividendDate': 'None', 
+            'ExDividendDate': '1995-04-27'
+        }
+        '''
+
+        uri = f'/query?function=OVERVIEW&symbol={symbol}&apikey={self.avKey}'
+        endpoint = self.url + uri
+
+        # make request and unpack data
+        response = requests.get( endpoint )
+        data = response.json()
+
+        return data
+
     def getStockData (self, symbol:str, interval:int=5) -> list:
 
         '''
@@ -169,7 +238,8 @@ class alphaVantage:
         from alphaVantage API. Data is saved in global .data object.
         '''
 
-        endpoint = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval={interval}min&outputsize=full&apikey={self.avKey}'
+        uri = f'/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval={interval}min&outputsize=full&apikey={self.avKey}'
+        endpoint = self.url + uri
 
         # make request and unpack data
         response = requests.get( endpoint )
@@ -192,4 +262,4 @@ class alphaVantage:
 
 if __name__ == '__main__':
     # print(load.loadOhlcFromFile('XBTUSD_1440.csv'))
-    api = krakenApi.price('xbt')
+    #api = krakenApi.price('xbt')
